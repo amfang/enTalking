@@ -43,6 +43,10 @@ var STTModule = (function() {
 
   function micON() { // When the microphone button is clicked
     //alert("micON clicked --- recording: "+recording);
+
+    //stop audio
+    Media.stop();
+
     if (recording === false) {
       //alert("micON clicked --- records: "+records);
       var payload;

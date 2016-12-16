@@ -33,6 +33,7 @@ var ConversationResponse = (function() {
     };
 
     function init() {
+        //alert("ConversationResponse -- init");
         setupResponseFunctions();
         setupResponseHandling();
     }
@@ -45,10 +46,20 @@ var ConversationResponse = (function() {
                     AC: function() { Panel.ac('lo'); },
                     fan: function() { Panel.ac('lo'); },
                     heater: function() { Panel.heat('lo'); },
-                    lights: function() { Animations.lightsOn(); },
+                    lights: function() { alert("function of turn_on_lightsOn is triggerred"); },//Animations.lightsOn(); },
                     wipers: function() { Animations.wipersOn('lo'); }
                 },
-                genre: function(value) { Panel.playMusic(value); }
+                genre: function () { alert("function playMusic"); }//function(value) { Panel.playMusic(value); }
+            },
+            traffic_update: {
+                appliance: {
+                    AC: function() { Panel.ac('lo'); },
+                    fan: function() { Panel.ac('lo'); },
+                    heater: function() { Panel.heat('lo'); },
+                    lights: function() { alert("function of turn_on_lightsOn is triggerred in traffic"); },//Animations.lightsOn(); },
+                    wipers: function() { Animations.wipersOn('lo'); }
+                },
+                genre: function (value) { Media.play(); } //alert("function playMusic - value: "+value); }
             },
             turn_off: {
                 appliance: {
@@ -101,10 +112,10 @@ var ConversationResponse = (function() {
     // Create a callback when a new Watson response is received to handle Watson's response
     function setupResponseHandling() {
         //alert("ConversationResponse -- setupResponseHandling");
-        var currentResponsePayloadSetter = Api.setWatsonPayload;
-        Api.setWatsonPayload = function(payload) {
-            currentResponsePayloadSetter.call(Api, payload);
-            responseHandler(payload);
+        var currentResponsePayloadSetter = Api.setResponsePayload;
+        Api.setResponsePayload = function(newPayloadStr) {
+            currentResponsePayloadSetter.call(Api, newPayloadStr);
+            responseHandler(JSON.parse(newPayloadStr));
         };
     }
 
@@ -118,27 +129,33 @@ var ConversationResponse = (function() {
                 // TODO add EIR link
                 data.output.text = ['I am not able to answer that. You can try asking the'
                 + ' <a href="https://conversation-enhanced.mybluemix.net/" target="_blank">Enhanced Information Retrieval App</a>'];
-                Api.setWatsonPayload(data);
+                Api.setResponsePayload(JSON.stringify(data));
                 return;
             }
 
+            //alert("ConversationResponse -- responseHandler -- data: "+JSON.stringify(data));
             var primaryIntent = data.intents[0];
             if (primaryIntent) {
                 handleBasicCase(primaryIntent, data.entities);
             }
         }
+        //alert("ConversationResponse -- responseHandler -- completed");
     }
 
     // Handles the case where there is valid intent and entities
     function handleBasicCase(primaryIntent, entities) {
-        //alert("ConversationResponse -- handleBasicCase");
+        //alert("ConversationResponse -- handleBasicCase -- primaryIntent: "+JSON.stringify(primaryIntent));
         var genreFound = null;
         // If multiple entities appear (with the exception of music),
         // do not perform any actions
+        //alert("ConversationResponse -- handleBasicCase -- entities.length: "+entities.length+" -- entities: "+JSON.stringify(entities));
         if (entities.length > 1) {
+
             var invalidMultipleEntities = true;
             switch (primaryIntent.intent) {
                 case 'turn_on':
+                    alert("ConversationResponse -- handleBasicCase -- working on turn_on tasks");
+                    break;
                 case 'turn_off':
                 case 'turn_up':
                 case 'turn_down':
@@ -160,17 +177,23 @@ var ConversationResponse = (function() {
         // Otherwise, just take the first one (or the genre if one was found) and
         // look for the correct function to run
         if  (!invalidMultipleEntities) {
+
             var primaryEntity = (genreFound || entities[0]);
+            //alert("ConversationResponse -- handleBasicCase -- primaryEntity: "+JSON.stringify(primaryEntity));
             callResponseFunction(primaryIntent, primaryEntity);
         }
     }
 
     // Calls the appropriate response function based on the given intent and entity returned by Watson
     function callResponseFunction(primaryIntent, primaryEntity) {
+        //alert("ConversationResponse -- callResponseFunction -- primaryEntity.intent: "+primaryIntent.intent);
         var intent = responseFunctions[primaryIntent.intent];
+        //alert("ConversationResponse -- callResponseFunction -- intent: "+JSON.stringify(intent));
         if (typeof intent === 'function') {
+            //alert("intent function: "+JSON.stringify(intent));
             intent(primaryEntity.entity, primaryEntity.value);
         } else if (intent) {
+            //alert("intent: "+JSON.stringify(intent));
             if (primaryEntity) {
                 var entityType = intent[primaryEntity.entity];
                 if (typeof entityType === 'function') {

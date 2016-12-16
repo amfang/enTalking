@@ -38,16 +38,27 @@
       <div id="payload-response" class="payload"></div>
     </div>
   </div>
-
+  <script>
+    // For cloaking. Done in JS for the case of disabled JS (i.e. even though not much will work, something will be displayed.)
+    //document.body.style.visibility = 'hidden';
+    window.onload=function(){
+      /*
+      var audio = document.createElement('audio'); //生成一个audio元素
+      audio.controls = true; //这样控件才能显示出来
+      audio.src = 'music/tll.mp3'; //音乐的路径
+      audio.play();
+      */
+    };
+  </script>
   <script src="js/common.js"></script>
   <script src="js/api.js"></script>
   <script src="js/conversation.js"></script>
   <script src="js/response.js"></script>
+  <script src="js/action.js"></script>
   <script src="js/payload.js"></script>
   <script src="js/global.js"></script>
   <script src="ibm/watson-speech.min.js"></script>
   <script src="ibm/speech-to-text.js"></script>
   <script src="ibm/text-to-speech.js"></script>
-  <script src="ibm/test.js"></script>
 </body>
 </html>
