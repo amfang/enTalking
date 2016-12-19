@@ -53,6 +53,7 @@ var audio_state = 0;
 /***********************************************local Variables**********************************************************/
 
 function play(content, vcn){
+	alert("tts_demo play");
     reset();
 	
 	ssb_param = {"appid": '585516c9', "appkey":"ad08ba29ebec1469", "synid":"12345", "params" : "ent=aisound,aue=lame,vcn="+vcn};
@@ -60,6 +61,7 @@ function play(content, vcn){
 	session.start(ssb_param, content, function (err, obj)
 	{
 		var audio_url = audioPalyUrl + obj.audio_url;
+		alert("audioPalyUrl + obj.audio_url;"+obj.audio_url);
 		if( audio_url != null && audio_url != undefined )
 		{
 			window.iaudio.src = audio_url;

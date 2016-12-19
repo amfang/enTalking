@@ -39,17 +39,17 @@ var Media = (function() {
         //alert("Media -- init");
         media = document.createElement('audio'); //生成一个audio元素
         media.controls = true; //这样控件才能显示出来
-        media.src = 'music/tll.mp3'; //音乐的路径
+        //media.src = 'music/tll.mp3'; //音乐的路径 - put into params
     }
 
     //
-    function mediaPlay() {
+    function mediaPlay(src) {
         //alert("mediaPlay");
         /*if (TTSModule.audio !== null && !TTSModule.audio.ended) {
             alert("TTSModule.audio pause");
             TTSModule.audio.pause();
         }*/
-
+        media.src = src;
         media.play();
     }
 

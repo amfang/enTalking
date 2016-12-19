@@ -22,6 +22,7 @@ var STTModule = (function() {
   var recording  = false;
   var stream;
   var records    = 0;
+
   //alert("STTModule init");
   return {
     micON: micON,
@@ -67,9 +68,11 @@ var STTModule = (function() {
   }
 
   function speechToText() {
-    //alert("speechToText function");
+    console.log("speechToText function");
     mic.setAttribute('class', 'active-mic');  // Set CSS class of mic to indicate that we're currently listening to user input
     recording = true;                         // We'll be recording very shortly
+    var stt_model = Api.returnSTTModel();     // get stt_model by function from Api
+    console.log("speechToText -- Api.stt_model: "+stt_model);
     fetch('/api/speech-to-text/token')        // Fetch authorization token for Watson Speech-To-Text
       .then(function(response) {
         return response.text();
@@ -77,6 +80,7 @@ var STTModule = (function() {
       .then(function(token) {// Pass token to Watson Speech-To-Text service
         //alert("speechToText -- stream: "+stream+" --- token: "+token);
         stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
+          model: stt_model || 'en-US_BroadbandModel',      //The identifier of the model to be used - en-US_BroadbandModel(default)/zh-CN_BroadbandModel
           token: token,                       // Authorization token to use this service, configured from /speech/stt-token.js file
           continuous: false,                  // False = automatically stop transcription the first time a pause is detected
           outputElement: '#textInput',       // CSS selector or DOM Element

@@ -24,6 +24,9 @@
 
 var ConversationResponse = (function() {
     'use strict';
+
+    //definition of default STT language model
+
     var responseFunctions;
     //alert("ConversationResponse");
 
@@ -59,7 +62,10 @@ var ConversationResponse = (function() {
                     lights: function() { alert("function of turn_on_lightsOn is triggerred in traffic"); },//Animations.lightsOn(); },
                     wipers: function() { Animations.wipersOn('lo'); }
                 },
-                genre: function (value) { Media.play(); } //alert("function playMusic - value: "+value); }
+                genre: function (value) {
+                    var src = "music/tll.mp3";
+                    Media.play(src);
+                } //alert("function playMusic - value: "+value); }
             },
             turn_off: {
                 appliance: {
@@ -115,25 +121,30 @@ var ConversationResponse = (function() {
         var currentResponsePayloadSetter = Api.setResponsePayload;
         Api.setResponsePayload = function(newPayloadStr) {
             currentResponsePayloadSetter.call(Api, newPayloadStr);
+            console.log("response -- setupResponseHandling -- newPayloadStr:"+newPayloadStr)
             responseHandler(JSON.parse(newPayloadStr));
         };
     }
 
-    // Called when a Watson response is received, manages the behavior of the app based
+    // Called when a Watson response is received, manages the behavior of the app based - Action to Waston response
     // on the user intent that was determined by Watson
     function responseHandler(data) {
         //alert("ConversationResponse -- responseHandler");
         if (data && data.intents && data.entities && !data.output.error) {
+            /*
+             * - move to http.response to check the response then for preHandling
             // Check if message is handled by retrieve and rank and there is no message set
-            if (data.context.callRetrieveAndRank && !data.output.text) {
+            alert("data.context.call_retrieve_and_rank: "+data.context.call_retrieve_and_rank+"--- data.output.text: "+data.output.text);
+            if (data.context.call_retrieve_and_rank && data.output.text) {
+                alert("Out of scope");
                 // TODO add EIR link
                 data.output.text = ['I am not able to answer that. You can try asking the'
                 + ' <a href="https://conversation-enhanced.mybluemix.net/" target="_blank">Enhanced Information Retrieval App</a>'];
                 Api.setResponsePayload(JSON.stringify(data));
                 return;
             }
-
-            //alert("ConversationResponse -- responseHandler -- data: "+JSON.stringify(data));
+            */
+            //console.log("responseHandler -- data: "+JSON.stringify(data));
             var primaryIntent = data.intents[0];
             if (primaryIntent) {
                 handleBasicCase(primaryIntent, data.entities);
@@ -142,24 +153,28 @@ var ConversationResponse = (function() {
         //alert("ConversationResponse -- responseHandler -- completed");
     }
 
+    /*
+     * 根据response 来判断, off_topic/out off scope, 进行enhanced处理,提示中文输入或者爬虫获取互联网答案 - 参考enhanced -
+     * rest/ProxyResource.java 和retrieve_and_rank/Query.java
+     */
     // Handles the case where there is valid intent and entities
     function handleBasicCase(primaryIntent, entities) {
         //alert("ConversationResponse -- handleBasicCase -- primaryIntent: "+JSON.stringify(primaryIntent));
         var genreFound = null;
         // If multiple entities appear (with the exception of music),
         // do not perform any actions
-        //alert("ConversationResponse -- handleBasicCase -- entities.length: "+entities.length+" -- entities: "+JSON.stringify(entities));
+        console.log("handleBasicCase -- primaryIntent: "+primaryIntent+" -- entities: "+JSON.stringify(entities));
         if (entities.length > 1) {
 
             var invalidMultipleEntities = true;
             switch (primaryIntent.intent) {
                 case 'turn_on':
-                    alert("ConversationResponse -- handleBasicCase -- working on turn_on tasks");
+                    console.log("ConversationResponse -- handleBasicCase -- working on turn_on tasks");
                     break;
                 case 'turn_off':
                 case 'turn_up':
                 case 'turn_down':
-                    alert("ConversationResponse -- handleBasicCase -- working on turn_on tasks");
+                    console.log("ConversationResponse -- handleBasicCase -- working on turn_on tasks");
                     entities.forEach(function(currentEntity) {
                         var entityType = currentEntity.entity;
                         if (entityType === 'genre') {
@@ -179,6 +194,7 @@ var ConversationResponse = (function() {
         if  (!invalidMultipleEntities) {
 
             var primaryEntity = (genreFound || entities[0]);
+            console.log("handleBasicCase -- primaryEntity: "+JSON.stringify(primaryEntity));
             //alert("ConversationResponse -- handleBasicCase -- primaryEntity: "+JSON.stringify(primaryEntity));
             callResponseFunction(primaryIntent, primaryEntity);
         }
@@ -186,16 +202,20 @@ var ConversationResponse = (function() {
 
     // Calls the appropriate response function based on the given intent and entity returned by Watson
     function callResponseFunction(primaryIntent, primaryEntity) {
-        //alert("ConversationResponse -- callResponseFunction -- primaryEntity.intent: "+primaryIntent.intent);
+        console.log("callResponseFunction -- primaryIntent.intent: "+primaryIntent.intent);
         var intent = responseFunctions[primaryIntent.intent];
-        //alert("ConversationResponse -- callResponseFunction -- intent: "+JSON.stringify(intent));
+        console.log("callResponseFunction -- intent: "+JSON.stringify(intent));
+        console.log("intent function: "+typeof intent);
         if (typeof intent === 'function') {
-            //alert("intent function: "+JSON.stringify(intent));
+            console.log("intent function: "+typeof intent);
             intent(primaryEntity.entity, primaryEntity.value);
         } else if (intent) {
-            //alert("intent: "+JSON.stringify(intent));
+            console.log("intent: "+JSON.stringify(intent));
+            console.log("primaryEntity: "+JSON.stringify(primaryEntity));
+            console.log("typeof intent.func: "+typeof intent.func);
             if (primaryEntity) {
                 var entityType = intent[primaryEntity.entity];
+
                 if (typeof entityType === 'function') {
                     entityType(primaryEntity.value);
                 } else if (entityType) {
@@ -211,6 +231,7 @@ var ConversationResponse = (function() {
             } else if (typeof intent.func === 'function') {
                 intent.func();
             }
+            console.log("primaryEntity -- completed ");
         }
     }
 }());

@@ -41,7 +41,8 @@ var TTSModule = (function() {
       //alert("text--payload: "+newPayloadStr);
       //newPayloadStr -> JSON then for playCurrentAudio -- different with car-dashboard
       var payload = JSON.parse(newPayloadStr);
-      //alert("text--newPayloadStr: "+newPayloadStr);
+      alert("text--newPayloadStr: "+newPayloadStr);
+
       playCurrentAudio(payload.output); // Plays audio using output text
     };
   }
@@ -68,9 +69,9 @@ var TTSModule = (function() {
 
   // Stops the audio for an older message and plays audio for current message
   function playCurrentAudio(payload) {
-    console.log("payload.stringfy: "+JSON.stringify(payload));
+    alert("payload.stringfy: "+JSON.stringify(payload));
     //alert("payload.text: "+payload.text);
-    var text = payload.text;
+    /*var text = payload.text;
     var reg = new RegExp("[\\u4E00-\\u9FFF]+","g");
     if(reg.test(text)) {
       //alert("textToSpeech - newPayloadStr: "+text+" -- 汉字！");
@@ -78,7 +79,7 @@ var TTSModule = (function() {
       Media.play(src);
       return;
     }
-
+    */
     fetch('/api/text-to-speech/token') // Retrieve TTS token -- app.js defined -> speech/text-to-speech server
         .then(function(response) {
           return response.text();

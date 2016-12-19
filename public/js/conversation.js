@@ -48,6 +48,7 @@ var ConversationPanel = (function() {
     var currentResponsePayloadSetter = Api.setResponsePayload;
     Api.setResponsePayload = function(newPayloadStr) {
       currentResponsePayloadSetter.call(Api, newPayloadStr);
+      //alert("Api.setResponsePayload : "+newPayloadStr);
       displayMessage(JSON.parse(newPayloadStr), settings.authorTypes.watson);
     };
   }
@@ -121,6 +122,7 @@ var ConversationPanel = (function() {
 
   // Display a user or Watson message that has just been sent/received
   function displayMessage(newPayload, typeValue) {
+
     var isUser = isUserMessage(typeValue);
     var textExists = (newPayload.input && newPayload.input.text)
         || (newPayload.output && newPayload.output.text);
@@ -224,7 +226,7 @@ var ConversationPanel = (function() {
       if (latestResponse) {
         context = latestResponse.context;
       }
-      //alert("inputKeyDown - context: "+JSON.stringify(context));
+      //alert("inputKeyDown - inputBox.value: "+inputBox.value);
       // Send the user message
       Api.sendRequest(inputBox.value, context);
 
