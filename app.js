@@ -18,16 +18,21 @@
 
 require ( 'dotenv' ).config ( {silent: true} );
 var express = require ( 'express' );
-//var compression = require ( 'compression' );
+var helmet = require('helmet');
 var bodyParser = require ( 'body-parser' );  // parser for post requests
 var watson = require ( 'watson-developer-cloud' );
 
 //The conversation workspace id
 var workspace_id = process.env.WORKSPACE_ID || '<workspace_id>';
 //var logs = null;
-console.log("workspace_id"+workspace_id);
+//console.log("workspace_id"+workspace_id);
 
 var app = express ();
+app.use(helmet());
+
+//var express = require('express'); var helmet = require('helmet');var app = express();app.use(helmet());
+// -- http://www.th7.cn/web/js/201510/128119.shtml
+// -- 安全性相关的HTTP头
 
 //app.use ( compression () );
 app.use ( bodyParser.json () );
